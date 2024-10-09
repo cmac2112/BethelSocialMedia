@@ -12,3 +12,4 @@
 - npm i
 - node index.js - to start the server
 - node db-init - to drop and repopulate the database
+
