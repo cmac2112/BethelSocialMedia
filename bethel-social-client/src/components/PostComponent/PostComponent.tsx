@@ -2,11 +2,11 @@ import React from 'react'
 
 
 /*im thinking that we may need a post component like this so we can reuse it on the
-home page and the profile page.
+home page and the profile page. we feed it the post data we grab into the return here and render it for each post
 */
 const PostComponent = () => {
     //this will need props, they should come from the
-    //parent component this is a child of to determine what 
+    //parent component, this is a child of to determine what 
     //posts we need to show
 
 
