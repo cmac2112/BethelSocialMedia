@@ -5,8 +5,8 @@ import { Link } from 'react-router-dom'
 const LoginPage = () => {
   return (
     <div>Landing page, make changes here
-        <Link to="/home" className="p-5 text-blue-500">Go to Home Page</Link>
-        <Link to="/profile" className="p-5 text-blue-500">Go to Profile Page</Link>
+        <Link to="/home" className="p-5 text-maroon">Go to Home Page</Link>
+        <Link to="/profile" className="p-5 text-maroon">Go to Profile Page</Link>
     </div>
   )
 }
