@@ -13,3 +13,11 @@
 - node index.js - to start the server
 - node db-init - to drop and repopulate the database
 
+# About this project
+
+Bethel College student organizations have no other way of contacting students except through email. Many students do not check their emails, or are too annoyed with the 
+hundreds of emails a day to even bother looking at them. This basic social media will allow student organizations and students themselves to communicate events though text
+and images, similar to popular social medias of today.
+
+Security and accountability has been taken into account and serves a large role in development, each account registered on our site must be of @bethelks.edu origin. 
+All posts are permanantly linked to the user's @bethelks account which will allow us to hold accounts who violate our terms or the school's terms accountable. 

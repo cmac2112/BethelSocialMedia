@@ -6,6 +6,8 @@ const cors = require('cors');
 app.use(cors());
 app.use(express.json())
 
+// will need some sort of middleware to handle files in POST requests
+
 app.get('/api/test', (req, res)=>{
     console.log(req.method + ' request for ' + req.url);
         res.send({message: 'test api'})
