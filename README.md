@@ -7,6 +7,9 @@ define your login .env file for mysql
 you will need DB_USER="Your Username"
 and DB_password="Your password"
 
+docker compose up --build (to run and build it)
+docker compose down (to stop and deconstruct)
+
 
 
 # LOCAL
