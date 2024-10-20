@@ -4,7 +4,9 @@ services:
     working_dir: /usr/src/app
     volumes:
       - ./bethel-social-server:/usr/src/app
-    build: .
+    build:
+      context: ./bethel-social-server
+      dockerfile: Dockerfile
     environment:
       DB_HOST: mysql_server
       DB_PORT: 3306
@@ -18,7 +20,7 @@ services:
     depends_on:
       mysql_server:
         condition: service_healthy
-  
+
   mysql_server:
     image: mysql:8.0
     environment:
@@ -30,7 +32,7 @@ services:
       - "3307:3306"
     command: --default-authentication-plugin=mysql_native_password
     healthcheck:
-      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 1s
       timeout: 3s
       retries: 30
@@ -38,5 +40,8 @@ services:
   frontend:
     build:
       context: ./bethel-social-client
+      dockerfile: Dockerfile
     ports:
-      - "8080:8080" # http://192.168.113.3:8080/
+      - "8080:8080" # http://172.168.113.3:8080/
+    environment:
+     - NODE_ENV=production
