@@ -1,5 +1,15 @@
 # Steps for starting this application
 
+# DOCKER
+
+define your login .env file for mysql
+
+you will need DB_USER="Your Username"
+and DB_password="Your password"
+
+
+
+# LOCAL
 1. Start the client - naviate to BethelSocialMedia\bethel-social-client> 
 
 - npm i
