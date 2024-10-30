@@ -12,11 +12,15 @@ interface PostComponentProps {
   //pfp : file or something
   text: string;
   likes: number;
+
 }
 const PostComponent: React.FC<PostComponentProps> = ({
   username,
   text,
   likes,
+  //image
+  //date
+  //pfp
 }) => {
   //this will need props, they should come from the
   //parent component, this is a child of to determine what

@@ -45,3 +45,6 @@ services:
       - "8080:8080" # http://172.168.113.3:8080/
     environment:
      - NODE_ENV=production
+
+
+#exec mysql -uroot -p - to access mysql in the container
