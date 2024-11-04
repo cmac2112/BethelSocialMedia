@@ -1,0 +1,12 @@
+steps:
+  # Step 1: Build and push images using Docker Compose
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['compose', '-f', 'docker-compose.yaml', 'build']
+    
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['compose', '-f', 'docker-compose.yaml', 'push']
+
+# Optional: specify the images you pushed if using GCR
+images:
+  - gcr.io/bubbly-jigsaw-440718-u6/YOUR_IMAGE_NAME_1
+  - gcr.io/bubbly-jigsaw-440718-u6/YOUR_IMAGE_NAME_2
