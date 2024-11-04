@@ -10,3 +10,4 @@ steps:
 images:
   - gcr.io/bubbly-jigsaw-440718-u6/YOUR_IMAGE_NAME_1
   - gcr.io/bubbly-jigsaw-440718-u6/YOUR_IMAGE_NAME_2
+logsBucket: "gs://bubbly-jigsaw-440718-u6-build-logs"
