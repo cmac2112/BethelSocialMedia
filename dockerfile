@@ -16,6 +16,8 @@ COPY . .
 # Build the frontend.
 RUN npm run build:frontend
 
+RUN ls -la /usr/src/app/bethel-social-client/dist
+
 # Run the web service on container startup.
 CMD ["node", "index.js"]
 
