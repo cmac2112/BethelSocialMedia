@@ -13,3 +13,5 @@ steps:
 
 images:
   - 'gcr.io/bethelsocial/node:latest'
+options:
+  logging: CLOUD_LOGGING_ONLY
