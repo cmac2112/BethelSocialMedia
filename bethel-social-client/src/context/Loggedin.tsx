@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect } from "react";
+import React, { createContext, useEffect } from "react";
 import { useGoogleLogin, googleLogout } from '@react-oauth/google';
 
 interface LoggedInContextType {
