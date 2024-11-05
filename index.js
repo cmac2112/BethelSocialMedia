@@ -34,11 +34,11 @@ app.get('/api/test', (req, res)=>{
 */
 
 // Serve static files from the React app, this allows us to not have 3 containers running and makes it easier to host
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, './bethel-social-client/dist')));
 
 // Fallback to index.html for SPA routing
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, './bethel-social-client/dist', 'index.html'));
 });
 const port = process.env.SERVER_PORT || 3000;
     app.listen(port, () =>{

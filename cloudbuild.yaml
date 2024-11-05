@@ -1,12 +1,15 @@
 steps:
-  # Step 1: Build and push images using Docker Compose
+  # Step 1: Build the Docker image
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['compose', '-f', 'docker-compose.yaml', 'build']
-    
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['compose', '-f', 'docker-compose.yaml', 'push']
+    args: ['build', '-t', 'gcr.io/bethelsocial/node:latest', '.']
 
-# Optional: specify the images you pushed if using GCR
+  # Step 2: Push the Docker image to Google Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/bethelsocial/node:latest']
+
+  # Step 3: Deploy the Docker image to Google Cloud Run
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args: ['run', 'deploy', 'node-app', '--image', 'gcr.io/bethelsocial/node:latest', '--platform', 'managed', '--region', 'us-central1', '--allow-unauthenticated']
+
 images:
-  - gcr.io/bubbly-jigsaw-440718-u6/YOUR_IMAGE_NAME_1
-  - gcr.io/bubbly-jigsaw-440718-u6/YOUR_IMAGE_NAME_2
+  - 'gcr.io/bethelsocial/node:latest'
