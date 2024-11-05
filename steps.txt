@@ -1,0 +1,17 @@
+# Authenticate with Google Cloud
+gcloud auth login
+
+# Configure Docker to use gcloud for authentication
+gcloud auth configure-docker
+
+# Build the Docker image
+docker build -t node:latest .
+
+# Tag the Docker image
+docker tag node:latest gcr.io/bethelsocial/node:latest
+
+# Push the Docker image to Google Container Registry
+docker push gcr.io/bethelsocial/node:latest
+
+# Deploy to Google Cloud Run
+gcloud run deploy --image gcr.io/bethelsocial/node:latest --platform managed
