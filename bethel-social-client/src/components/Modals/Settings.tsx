@@ -2,7 +2,9 @@
 
 const Settings = () => {
   return (
-    <div>Settings</div>
+    <div>
+      <textarea className="border-2 border-x-blue-500" placeholder="Enter your bio here"></textarea>
+    </div>
   )
 }
 
