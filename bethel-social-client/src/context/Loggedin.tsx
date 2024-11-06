@@ -3,7 +3,7 @@ import { useGoogleLogin, googleLogout } from '@react-oauth/google';
 
 interface LoggedInContextType {
     isLoggedIn?: boolean;
-    setIsLoggedIn: (isloggedIn: boolean) => void;
+    setIsLoggedIn: (isLoggedIn: boolean) => void;
     userInfo?: any;
 }
 
@@ -20,13 +20,15 @@ interface LoggedInProviderProps {
 export const LoggedInProvider: React.FC<LoggedInProviderProps> = ({ children }) => {
     const [isLoggedIn, setIsLoggedIn] = React.useState(false);
     const [userInfo, setUserInfo] = React.useState<any>(null);
-
     const login = useGoogleLogin({
+        scope: "openid profile email",
         onSuccess: async (tokenResponse) => {
             console.log('Login Success:', tokenResponse);
             setIsLoggedIn(true);
-            localStorage.setItem('authToken', tokenResponse.access_token);
-
+            const { access_token} = tokenResponse;
+            console.log('Access Token:', access_token);
+            
+            localStorage.setItem('authToken', tokenResponse.access_token)
             // Fetch user information from Google's UserInfo API
             const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
                 headers: {
@@ -35,6 +37,7 @@ export const LoggedInProvider: React.FC<LoggedInProviderProps> = ({ children }) 
             });
             const userInfoData = await userInfoResponse.json();
             setUserInfo(userInfoData);
+            console.log('User Info:', userInfoData);
         },
         onError: (error) => {
             console.log('Login Failed:', error);
@@ -54,16 +57,49 @@ export const LoggedInProvider: React.FC<LoggedInProviderProps> = ({ children }) 
         const token = localStorage.getItem('authToken');
         if (token) {
             setIsLoggedIn(true);
-            // Optionally, you can fetch user info here as well if needed
         }
     }, []);
+
+    const updateUserProfile = async () => {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            throw new Error('No token found');
+        }
+
+        const response = await fetch('http://localhost:3000/api/authtest', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ profileData: 'new profile data' })
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to update profile');
+        }
+
+        const data = await response.json();
+        console.log('Profile updated:', data);
+        return data;
+    };
 
     return (
         <LoginContext.Provider value={{ isLoggedIn, setIsLoggedIn, userInfo }}>
             {isLoggedIn ? (
-                <button onClick={handleLogout}>Logout</button>
+                <div>
+                    <button onClick={handleLogout}>Logout</button>
+                    {userInfo && (
+                        <>
+                            <p>{userInfo.name}</p>
+                            <p>{userInfo.email}</p>
+                            <img src={userInfo.picture} alt={userInfo.name} />
+                            <button onClick={updateUserProfile}>Update Profile</button>
+                        </>
+                    )}
+                </div>
             ) : (
-                <button onClick={() => login()}>Login with Google</button>
+                <button onClick={() =>login()}>Login with Google</button>
             )}
             {children}
         </LoginContext.Provider>

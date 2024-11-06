@@ -6,7 +6,7 @@ import { LoggedInProvider } from './context/Loggedin.tsx'
 import { GoogleOAuthProvider } from '@react-oauth/google'
 
 createRoot(document.getElementById('root')!).render(
-  <GoogleOAuthProvider clientId='951995672515-9vhq40k5s6f41485aodjtiki00cncqn0.apps.googleusercontent.com'>
+  <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
   <LoggedInProvider>
   <StrictMode>
     <App />
