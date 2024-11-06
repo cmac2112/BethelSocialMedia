@@ -10,7 +10,7 @@ steps:
   # Step 3: Deploy the Docker image to Google Cloud Run
   - name: 'gcr.io/cloud-builders/gcloud'
     args: ['run', 'deploy', 'node-app', '--image', 'gcr.io/bethelsocial/node:latest', '--platform', 'managed', '--region', 'us-central1', '--allow-unauthenticated']
-
+  # fails for some reason, figure out why so we can have automatical deployment
 images:
   - 'gcr.io/bethelsocial/node:latest'
 options:
