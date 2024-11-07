@@ -83,6 +83,30 @@ export const LoggedInProvider: React.FC<LoggedInProviderProps> = ({ children }) 
         console.log('Profile updated:', data);
         return data;
     };
+    const createUser = async () => {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            throw new Error('No token found');
+        }
+
+        const response = await fetch('http://localhost:3000/api/createuser', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ profileData: 'new profile data' })
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to update profile');
+        }
+
+        const data = await response.json();
+        console.log('Profile updated:', data);
+        return data;
+    };
+    
 
     return (
         <LoginContext.Provider value={{ isLoggedIn, setIsLoggedIn, userInfo }}>
@@ -95,6 +119,7 @@ export const LoggedInProvider: React.FC<LoggedInProviderProps> = ({ children }) 
                             <p>{userInfo.email}</p>
                             <img src={userInfo.picture} alt={userInfo.name} />
                             <button onClick={updateUserProfile}>Update Profile</button>
+                            <button onClick={createUser}>Create User</button>
                         </>
                     )}
                 </div>

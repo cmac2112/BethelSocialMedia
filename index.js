@@ -35,7 +35,30 @@ app.get("/api/test", (req, res) => {
     ...
     })
 */
+app.post('/api/createuser', async(req,res)=>{
+  const accessToken = req.headers.authorization?.split(' ')[1];
+  if (!accessToken){
+    return res.status(401).send('Missing token');
+  }
+  try{
+    const userInfoResponse = await fetch(GOOGLE_USERINFO_API, {
+      headers:{
+        'Authorization': `Bearer ${accessToken}`,
+      },
 
+    });
+    if (!userInfoResponse.ok){
+      return res.status(401).send('Invalid token');
+    }
+    const userInfo = await userInfoResponse.json();
+    const userIdtoStore = userInfo.sub
+
+    console.log(userIdtoStore)
+  }catch(error){
+    console.error(error)
+  }
+
+})
 app.post('/api/authtest', async (req, res) =>{
 const accessToken = req.headers.authorization?.split(' ')[1]; // Extract the token from Authorization header
 console.log(accessToken)
