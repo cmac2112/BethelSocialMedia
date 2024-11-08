@@ -9,11 +9,9 @@ const path = require("path");
 const bodyParser = require("body-parser");
 app.use(bodyParser.json());
 
-const GOOGLE_USERINFO_API = 'https://www.googleapis.com/oauth2/v3/userinfo';
+const GOOGLE_USERINFO_API = "https://www.googleapis.com/oauth2/v3/userinfo";
 const { OAuth2Client } = require("google-auth-library");
-const client = new OAuth2Client(
-  process.env.CLIENT_ID
-);
+const client = new OAuth2Client(process.env.CLIENT_ID);
 
 // will need some sort of middleware to handle files in POST requests
 // multer is the middleware, storing files is another issue
@@ -35,73 +33,82 @@ app.get("/api/test", (req, res) => {
     ...
     })
 */
-app.post('/api/createuser', async(req,res)=>{
-  const accessToken = req.headers.authorization?.split(' ')[1];
-  if (!accessToken){
-    return res.status(401).send('Missing token');
+
+
+
+
+
+
+//use this to ensure valid @bethelks domain
+// ensure user is who they say they are
+const validateToken = async (req, res, next) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) {
+    console.log("missing token");
+    return res.status(401).send("Missing token");
   }
-  try{
+  try {
     const userInfoResponse = await fetch(GOOGLE_USERINFO_API, {
-      headers:{
-        'Authorization': `Bearer ${accessToken}`,
+      headers: {
+        Authorization: `Bearer ${token}`,
       },
-
     });
-    if (!userInfoResponse.ok){
-      return res.status(401).send('Invalid token');
-    }
-    const userInfo = await userInfoResponse.json();
-    const userIdtoStore = userInfo.sub
 
-    console.log(userIdtoStore)
-  }catch(error){
-    console.error(error)
+    if (!userInfoResponse.ok) {
+      return res.status(401).send("Invalid token");
+    }
+
+    const userInfo = await userInfoResponse.json();
+    if (userInfo.hd !== "bethelks.edu") {
+      return res.status(401).send("invalid email domain");
+    }
+  } catch (error) {
+    console.log("error here");
+    return res.status(401).send("unable to authenticate email domain");
+  }
+  try {
+    const response = await fetch(
+      `https://oauth2.googleapis.com/tokeninfo?access_token=${token}`
+    );
+
+    if (!response.ok) {
+      console.log("invalid token, response failed");
+      return res.status(401).send("Invalid token");
+    }
+
+    const tokenInfo = await response.json();
+    console.log(tokenInfo)
+
+    req.user = tokenInfo; // Attach token info to the request object
+    next(); // Proceed to the next middleware or route handler
+  } catch (error) {
+    console.error("Token validation error:", error);
+    return res.status(401).send("Invalid token");
+  }
+};
+
+app.post("/api/authtest", validateToken, async (req, res) => {
+  const accessToken = req.headers.authorization?.split(" ")[1]; // Extract the token from Authorization header
+  
+  if (!accessToken) {
+    return res.status(401).send("Missing token");
   }
 
-})
-app.post('/api/authtest', async (req, res) =>{
-const accessToken = req.headers.authorization?.split(' ')[1]; // Extract the token from Authorization header
-console.log(accessToken)
-    if (!accessToken) {
-        return res.status(401).send('Missing token');
+    // Query the database and ensure the user has access to their data
+    const userData = await getUserData(req.user); // Replace with actual DB query
+    console.log(req.user.sub)
+    if (!userData) {
+      return res.status(404).send("User not found");
     }
 
-    try {
-        // Fetch user info using the access token
-        const userInfoResponse = await fetch(GOOGLE_USERINFO_API, {
-            headers: {
-                'Authorization': `Bearer ${accessToken}`,
-            },
-        });
-
-        if (!userInfoResponse.ok) {
-            return res.status(401).send('Invalid token');
-        }
-
-        const userInfo = await userInfoResponse.json();
-        const userId = userInfo.sub; // The user's unique Google ID
-        
-        
-        // Query the database and ensure the user has access to their data
-        const userData = await getUserData(userId); // Replace with actual DB query
-
-        if (!userData) {
-            return res.status(404).send('User not found');
-        }
-
-        // Send the user data back
-        res.json(userData);
-
-    } catch (error) {
-        console.error('Token verification failed', error);
-        res.status(401).send('Invalid token');
-    }
+    // Send the user data back
+    res.json(userData);
 });
 
-const getUserData = async () =>{
-    const userId = '239074623784'
-    return { userId, name: 'test', email: 'random@random.com'}
-}
+const getUserData = async () => {
+  const userId = "239074623784";
+  return { userId, name: "test", email: "random@random.com" };
+};
 // Serve static files from the React app, this allows us to not have 3 containers running and makes it easier to host
 app.use(express.static(path.join(__dirname, "./bethel-social-client/dist")));
 
