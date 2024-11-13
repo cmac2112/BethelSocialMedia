@@ -1,0 +1,18 @@
+.homepage-container {
+    background-image: url('../../assets/background.jpg');
+    background-attachment: fixed;
+    background-size: cover;
+    background-position: center;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .content {
+    text-align: center;
+    background: rgba(0, 0, 0, 0.5); /* Add a semi-transparent background for better text readability */
+    padding: 20px;
+    border-radius: 10px;
+  }
+  

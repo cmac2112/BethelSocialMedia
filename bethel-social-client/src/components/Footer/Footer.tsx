@@ -1,34 +1,41 @@
-import { Link } from 'react-router-dom'
-import Logo from '../../assets/logo.svg'
-const Footer = () => {
-    //colors set to change
-  return (
-    <div className="max-w-full flex justify-evenly bg-gray-100">
-        <div id="col1">
-            <img src={Logo} />
-            <p className='text-center'>BC-Social</p>
-        </div>
-        <div className="flex flex-col items-start" id="col2">
-            <h2 className="text-gray-600 font-semibold text-2xl text-center border-b-2">Contact Us</h2>
-            <p className="text-gray-600 text-xs py-1 text-center">cadenamcarthur@bethelks.edu</p>
-            <p className="text-gray-600 text-xs py-1 text-center">angeldhernandez@bethelks.edu</p>
-            <p className="text-gray-600 text-xs py-1 text-center">meriemdhouibi@bethelks.edu</p>
-            <p className="text-gray-600 text-xs py-1 text-center">micahdquinlin@bethelks.edu</p>
-            <p className="text-gray-600 text-xs py-1 text-center">sethabalzer@bethelks.edu</p>
-            <p className="text-gray-600 text-xs py-1 text-center">williamawalker@bethelks.edu</p>
-            <p className="text-gray-600 text-xs py-1 text-center">ethanpkennedy@bethelks.edu</p>
-        </div>
-        <div className="flex flex-col items-start" id="col3">
-            <h2 className="text-gray-600 font-semibold text-2xl text-center border-b-2">Navigation</h2>
-            <Link to="/" className="text-gray-600 text-xs py-1">Landing Page</Link>
-            <Link to="/login" className="text-gray-600 text-xs py-1">Login/Register</Link>
-            <Link to="/home" className="text-gray-600 text-xs py-1">Home</Link>
-            <Link to="/profile" className="text-gray-600 text-xs py-1">Profile</Link>
-            <Link to="/admin" className="text-gray-600 text-xs py-1">Administrative Login</Link>
-            <Link to="/tos" className="text-gray-600 text-xs py-1">Terms of Service</Link>
-        </div>
-    </div>
-  )
-}
+import { Link } from 'react-router-dom';
+import Logo from '../../assets/logo.svg';
 
-export default Footer
+const Footer: React.FC = () => {
+  return (
+    <footer className="max-w-full bg-gray-100 p-8">
+      <div className="container mx-auto flex flex-wrap justify-between">
+        <div id="col1" className="flex flex-col items-center mb-6">
+          <img src={Logo} alt="BC-Social Logo" className="h-16 w-16 mb-2" />
+          <p className="text-center text-lg font-bold">BC-Social</p>
+        </div>
+        <div className="flex flex-col items-start mb-6" id="col2">
+          <h2 className="text-gray-600 font-semibold text-2xl text-center border-b-2 mb-4">Contact Us</h2>
+          {["cadenamcarthur@bethelks.edu", "angeldhernandez@bethelks.edu", "meriemdhouibi@bethelks.edu", "micahdquinlin@bethelks.edu", "sethabalzer@bethelks.edu", "williamawalker@bethelks.edu", "ethanpkennedy@bethelks.edu"].map(email => (
+            <p key={email} className="text-gray-600 text-sm py-1 text-center">{email}</p>
+          ))}
+        </div>
+        <nav className="flex flex-col items-start mb-6" id="col3">
+          <h2 className="text-gray-600 font-semibold text-2xl text-center border-b-2 mb-4">Navigation</h2>
+          {[
+            { to: "/", label: "Landing Page" },
+            { to: "/login", label: "Login/Register" },
+            { to: "/home", label: "Home" },
+            { to: "/profile", label: "Profile" },
+            { to: "/admin", label: "Administrative Login" },
+            { to: "/tos", label: "Terms of Service" }
+          ].map(link => (
+            <Link key={link.to} to={link.to} className="text-gray-600 text-sm py-1 hover:underline">
+              {link.label}
+            </Link>
+          ))}
+        </nav>
+      </div>
+      <div className="text-center text-gray-500 text-xs mt-4">
+        © {new Date().getFullYear()} BC-Social. All rights reserved.
+      </div>
+    </footer>
+  );
+};
+
+export default Footer;
