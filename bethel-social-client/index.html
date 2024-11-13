@@ -1,13 +1,92 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BCSocial</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+    <title>BCSocial - Post Upload</title>
+</head>
+<body>
+
+    <h1>BCSocial - Post Upload</h1>
+
+    <!-- Form for uploading a new post -->
+    <form id="postForm" enctype="multipart/form-data">
+        <input type="text" id="title" placeholder="Title" required>
+        <textarea id="content" placeholder="Content" required></textarea>
+        <input type="text" id="author" placeholder="Author" required>
+        <input type="file" id="image" name="image" accept="image/*" required>
+        <button type="submit">Submit</button>
+    </form>
+
+    <hr>
+
+    <!-- Section to display posts with images -->
+    <div id="postsContainer"></div>
+
+    <script>
+        // Function to submit form data and upload a new post
+        document.getElementById('postForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const formData = new FormData();
+            formData.append('title', document.getElementById('title').value);
+            formData.append('content', document.getElementById('content').value);
+            formData.append('author', document.getElementById('author').value);
+            formData.append('image', document.getElementById('image').files[0]);
+
+            fetch('http://localhost:3000/upload', {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => { throw new Error(text) });
+                }
+                return response.text();
+            })
+            .then(data => {
+                alert(data);
+                document.getElementById('postForm').reset();
+                fetchPosts(); // Refresh posts after a new one is added
+            })
+            .catch(error => {
+                alert('Error: ' + error.message);
+                console.error('Error:', error);
+            });
+        });
+
+        // Function to fetch and display posts with images
+        function fetchPosts() {
+            fetch('http://localhost:3000/posts')
+                .then(response => response.json())
+                .then(posts => {
+                    const postsContainer = document.getElementById('postsContainer');
+                    postsContainer.innerHTML = ''; // Clear previous posts
+
+                    posts.forEach(post => {
+                        const postElement = document.createElement('div');
+                        postElement.className = 'post';
+
+                        // Display post details and image if available
+                        postElement.innerHTML = `
+                            <h3>${post.title}</h3>
+                            <p>${post.content}</p>
+                            <p><strong>Author:</strong> ${post.author}</p>
+                            ${post.image_path ? `<img src="${post.image_path}" alt="Post Image" style="max-width: 100%; height: auto;">` : ''}
+                            <hr>
+                        `;
+
+                        postsContainer.appendChild(postElement);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching posts:', error);
+                });
+        }
+
+        // Load posts when the page is loaded
+        window.onload = fetchPosts;
+    </script>
+</body>
 </html>
