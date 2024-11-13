@@ -76,6 +76,9 @@ const HomePage = () => {
     <Layout>
       {isLoggedIn ? (
       <div className="md:px-52 bg-gray-200">
+        <div className="py-2 ">
+        <CreatePost />
+        </div>
     <div className="font-semibold">
         {postsList}
     </div>
