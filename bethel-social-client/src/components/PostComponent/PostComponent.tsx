@@ -1,6 +1,7 @@
 import React from "react";
 import pfp from "../../assets/profilepic.jpg";
 import test from "../../assets/testimage.jpg"
+import { Link, useNavigate } from "react-router-dom";
 //import bigimg from "../../assets/img.jpg"
 
 /*im thinking that we may need a post component like this so we can reuse it on the
@@ -9,7 +10,7 @@ home page and the profile page. we feed it the post data we grab into the return
 
 interface PostComponentProps {
   username: string;
-  //pfp : file or something
+  pfp: string;
   text: string;
   likes: number;
 
@@ -22,6 +23,7 @@ const PostComponent: React.FC<PostComponentProps> = ({
   //date
   //pfp
 }) => {
+  const navigate = useNavigate();
   //this will need props, they should come from the
   //parent component, this is a child of to determine what
   //posts we need to show
@@ -41,8 +43,10 @@ const PostComponent: React.FC<PostComponentProps> = ({
   return (
     <div id="post-container" className="p-5 rounded-xl bg-white border-b-8 border-gray-300">
       <div id="pfp-username" className="flex border-b-2 border-maroon">
+        <Link to={`/profile/${username}`} className="flex">
         <img src={pfp} className="h-10 w-10 rounded-full" />
-        <p>{username}</p>
+        <p className="p-2">{username}</p>
+        </Link>
       </div>
       <div id="text-body" className="flex justify-center py-1">
         <div id="text-container" className="bg-gray-100 md:w-3/4 p-3 rounded-xl">

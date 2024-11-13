@@ -1,0 +1,16 @@
+{
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.20.0",
+    "google-auth-library": "^9.14.2",
+    "json": "^11.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "mysql": "^2.18.1",
+    "node-fetch": "^3.3.2",
+    "nodemon": "^3.1.7"
+  },
+  "scripts": {
+    "build:frontend": "cd bethel-social-client && npm install && npm run build"
+  }
+}
