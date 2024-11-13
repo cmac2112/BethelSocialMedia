@@ -1,10 +1,12 @@
 import { Link } from 'react-router-dom'
+import Logo from '../../assets/logo.svg'
 const Footer = () => {
     //colors set to change
   return (
     <div className="max-w-full flex justify-evenly bg-gray-100">
         <div id="col1">
-            <p>"logo here"</p>
+            <img src={Logo} />
+            <p className='text-center'>BC-Social</p>
         </div>
         <div className="flex flex-col items-start" id="col2">
             <h2 className="text-gray-600 font-semibold text-2xl text-center border-b-2">Contact Us</h2>
