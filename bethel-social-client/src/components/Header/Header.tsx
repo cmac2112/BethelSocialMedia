@@ -8,26 +8,26 @@ const Header = () => {
   return (
     <div className="max-w-full bg-maroon flex justify-between p-5">
       <div className="flex">
-        <img src={Logo} className="h-24 w-24 border rounded-full border-red-900" />
-        <h1 className="text-white font-semibold text-4xl py-6 px-2">BcSocial</h1>
+        <img src={Logo} className="md:h-24 md:w-24 border rounded-full border-red-900 h-12 w-12" />
+        <h1 className="text-white font-semibold md:text-4xl md:py-6 md:px-2 text-xl py-2">BcSocial</h1>
       </div>
       <div className="flex items-center justify-end">
         {isLoggedIn && (
-          <Link to="/home" className="p-2 text-white font-semibold text-2xl">
+          <Link to="/home" className="p-2 text-white font-semibold md:text-2xl text-xl">
             Home
           </Link>
         )}
         {isLoggedIn && (
-          <Link to="/profile" className="p-2 text-white font-semibold text-2xl">
+          <Link to="/profile" className="p-2 text-white font-semibold text-xl md:text-2xl">
             Profile
           </Link>
         )}
-        <button className="p-2 text-white font-semibold text-2xl"
+        <button className="p-2 text-white font-semibold text-xl md:text-2xl"
         onClick={isLoggedIn ? logout : login}>
           {!isLoggedIn ? `Login` : `Logout`
            /* logged in status will be stored in some sort of context provider*/}
         </button>
-        <button onClick={()=>updateUserProfile && updateUserProfile()}>update test again</button>
+        <button hidden onClick={()=>updateUserProfile && updateUserProfile()}>update test again</button>
       </div>
     </div>
   );

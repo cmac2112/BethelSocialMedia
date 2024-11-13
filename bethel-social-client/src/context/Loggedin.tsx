@@ -34,8 +34,7 @@ interface LoggedInProviderProps {
 
 export const AuthProvider: React.FC<LoggedInProviderProps> = ({ children }) => {
     const [isLoggedIn, setIsLoggedIn] = React.useState(false);
-    const [userInfo, setUserInfo] = React.useState<any>(null);
-
+    const [userInfo, setUserInfo] = React.useState<userInfo | null>(null);
     const login = useGoogleLogin({
         scope: "openid profile email",
         onSuccess: async (tokenResponse) => {

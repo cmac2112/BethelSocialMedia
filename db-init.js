@@ -10,7 +10,7 @@ const connectionConfig = {
   port: process.env.DB_PORT || 3306,
   user: process.env.DB_USER || DB_USER,
   password: process.env.DB_PASSWORD || DB_PASSWORD,
-  database: process.env.DB_DATABASE || "jobSite",
+  database: process.env.DB_DATABASE || "BCSocial",
 };
 
 const con = mysql.createConnection(connectionConfig);
@@ -49,16 +49,6 @@ timestamp	TIMESTAMP	Indexed
 post_text	TEXT	
 post_content	VARCHAR (URL)	
 
-Tags Table -- if needed
-Column	Type	Indexing
-tag_id	INT (PK)	Indexed (primary)
-tag_name	VARCHAR	Indexed
-
-Post_Tags Table (Join Table)
-Column	Type	Indexing
-post_id	INT (FK)	Indexed (foreign)
-tag_id	INT (FK)	Indexed (foreign)
-
 Post_User Table (With Composite Key)
 Column	Type	Indexing
 user_id	INT (FK)	Indexed (foreign)
@@ -70,7 +60,8 @@ con.query(`CREATE TABLE IF NOT EXISTS users(
     user_id INT PRIMARY KEY,
     name VARCHAR(50) NOT NULL,
     profile_pic VARCHAR(255),
-    bio LONGTEXT)`, function(err, res){
+    bio LONGTEXT,
+    banned INT NOT NULL DEFAULT 0)`, function(err, res){ //if banned == 1, then the user is banned and do not allow them to do anything
         if(err) throw err;
         console.log('created table users', res)
     })
@@ -161,5 +152,5 @@ postUserActions.forEach(action => {
 });
 
 
-
+console.log('successfully created bcsocial database')
 con.end();
