@@ -52,6 +52,19 @@ export const AuthProvider: React.FC<LoggedInProviderProps> = ({ children }) => {
             const userInfoData = await userInfoResponse.json();
             setUserInfo(userInfoData);
             console.log('User Info:', userInfoData);
+            try{
+                const response = await fetch('http://localhost:3000/api/createuser', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${tokenResponse.access_token}`
+                    }
+                })
+                const data = await response.json();
+                console.log(data);
+            }catch(e){
+                console.log(e);
+            }
             if (userInfoData.hd !== 'bethelks.edu') {
                 console.log('Invalid email domain');
                 setIsLoggedIn(false);

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import PostComponent from '../PostComponent'
 import Layout from '../Layout'
 import { useAuth } from '../../context/Loggedin'
@@ -69,6 +69,24 @@ const HomePage = () => {
   ];
   const { isLoggedIn, userInfo } = useAuth();
   console.log(isLoggedIn, userInfo)
+
+  const getPosts = async () =>{ //add extra functionality later to make only certain posts show up to reduce load times
+    const token = localStorage.getItem('authToken');
+    const response = await fetch('http://localhost:3000/api/getposts', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    const data = await response.json();
+    console.log(JSON.stringify(data))
+
+  }
+  useEffect(() => {
+    getPosts();
+  },[])
+
   const postsList = posts.map((post, index) => {
     return <PostComponent key={index} username={post.username} pfp={post.pfp} text={post.text} likes={post.likes} />
   })

@@ -18,7 +18,24 @@ const client = new OAuth2Client(process.env.CLIENT_ID);
 
 //we will need GET and POST for comments -- angel
 //we will need GET, PUT, and POST for profile bios
+const connectionConfig = {
+  host: process.env.DB_HOST || "Cmac24",
+  port: process.env.DB_PORT || 3306,
+  user: process.env.DB_USER || DB_USER,
+  password: process.env.DB_PASSWORD || DB_PASSWORD,
+  database: process.env.DB_DATABASE || "BCSocial",
+};
 
+const con = mysql.createConnection(connectionConfig);
+
+con.connect(function (err) {
+  if (err) throw err;
+  console.log("connected to mysql, database:" + connectionConfig.database);
+});
+con.query("USE BCSocial", function (err, result) {
+  if (err) throw err;
+  console.log("Using jobSite database");
+});
 app.get("/api/test", (req, res) => {
   console.log(req.method + " request for " + req.url);
   res.send({ message: "test api" });
@@ -33,11 +50,6 @@ app.get("/api/test", (req, res) => {
     ...
     })
 */
-
-
-
-
-
 
 //use this to ensure valid @bethelks domain
 // ensure user is who they say they are
@@ -66,6 +78,8 @@ const validateToken = async (req, res, next) => {
     console.log("error here");
     return res.status(401).send("unable to authenticate email domain");
   }
+
+
   try {
     const response = await fetch(
       `https://oauth2.googleapis.com/tokeninfo?access_token=${token}`
@@ -77,33 +91,68 @@ const validateToken = async (req, res, next) => {
     }
 
     const tokenInfo = await response.json();
-    console.log(tokenInfo)
-
-    req.user = tokenInfo; // Attach token info to the request object
+    try{
+    const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+      headers: {
+          'Authorization': `Bearer ${token}`
+      }
+  });
+    const userInfo = await userInfoResponse.json();
+    console.log(userInfo)
+    req.img = userInfo.picture
+    req.name = userInfo.name
+    req.userId = tokenInfo.sub; // Attach token info to the request object
     next(); // Proceed to the next middleware or route handler
+}catch(error){
+  console.error("userInfo error", error);
+  return res.status(402).send("failed to get user info")
+}
   } catch (error) {
     console.error("Token validation error:", error);
     return res.status(401).send("Invalid token");
   }
 };
 
-app.post("/api/authtest", validateToken, async (req, res) => {
-  const accessToken = req.headers.authorization?.split(" ")[1]; // Extract the token from Authorization header
-  
+app.post("/api/createuser", validateToken, async(req,res)=>{
+  const accessToken = req.headers.authorization?.split(" ")[1]
+
   if (!accessToken) {
     return res.status(401).send("Missing token");
   }
+  const username = req.name
+  const userId = req.userId
+  const pfp = req.img
+  const bio = req.body.bio
 
-    // Query the database and ensure the user has access to their data
-    const userData = await getUserData(req.user); // Replace with actual DB query
-    console.log(req.user.sub)
-    if (!userData) {
-      return res.status(404).send("User not found");
+  con.query(`INSERT IGNORE INTO users (user_id, name, profile_pic, bio) VALUES (?, ?, ?, ?)`, [userId, username, pfp, bio], function(err, result){
+    if(err){
+      console.error('error creating user:', err);
+      return res.send(500).send('Error creating user')
     }
+    console.log('User Created:', result);
+    res.status(201).send(JSON.stringify('User created successfully'));
+  })
+})
 
-    // Send the user data back
-    res.json(userData);
-});
+app.post("/api/createpost", validateToken, async(req,res)=>{
+  const accessToken = req.headers.authorization?.split(" ")[1]
+
+  if (!accessToken) {
+    return res.status(401).send("Missing token");
+  }
+  const username = req.name
+  const userId = req.userId; //req.userId comes from the validateToken middleware function
+  const postText = req.body.postText;
+  const postImage = req.body.image;
+  con.query(`INSERT INTO post (user_id, name, post_text, post_image) VALUES (?, ?, ?, ?)`, [userId, username, postText, postImage], function(err, result) {
+    if (err) {
+      console.error('Error inserting post:', err);
+      return res.status(500).send('Error inserting post, do you exist?');
+    }
+    console.log('Post inserted:', result);
+    res.status(201).send(JSON.stringify('Post created successfully'));
+  });
+})
 
 const getUserData = async () => {
   const userId = "239074623784";
