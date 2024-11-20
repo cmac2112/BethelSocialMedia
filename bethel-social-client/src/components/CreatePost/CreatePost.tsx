@@ -16,7 +16,7 @@ const CreatePost = () => {
         },
         body: JSON.stringify({
           postText: postText,
-          image: 'https://www.example.com/image.jpg'
+          image: 'testimage.jpg'
         })
       });
       const data = await response.json();

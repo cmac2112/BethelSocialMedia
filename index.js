@@ -91,34 +91,48 @@ const validateToken = async (req, res, next) => {
     }
 
     const tokenInfo = await response.json();
-    //console.log(tokenInfo)
-    console.log(tokenInfo.sub)
-
+    try{
+    const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+      headers: {
+          'Authorization': `Bearer ${token}`
+      }
+  });
+    const userInfo = await userInfoResponse.json();
+    console.log(userInfo)
+    req.img = userInfo.picture
+    req.name = userInfo.name
     req.userId = tokenInfo.sub; // Attach token info to the request object
     next(); // Proceed to the next middleware or route handler
+}catch(error){
+  console.error("userInfo error", error);
+  return res.status(402).send("failed to get user info")
+}
   } catch (error) {
     console.error("Token validation error:", error);
     return res.status(401).send("Invalid token");
   }
 };
 
-app.post("/api/authtest", validateToken, async (req, res) => {
-  const accessToken = req.headers.authorization?.split(" ")[1]; // Extract the token from Authorization header
-  
+app.post("/api/createuser", validateToken, async(req,res)=>{
+  const accessToken = req.headers.authorization?.split(" ")[1]
+
   if (!accessToken) {
     return res.status(401).send("Missing token");
   }
+  const username = req.name
+  const userId = req.userId
+  const pfp = req.img
+  const bio = req.body.bio
 
-    // Query the database and ensure the user has access to their data
-    const userData = await getUserData(req.user); // Replace with actual DB query
-    console.log(req.user.sub)
-    if (!userData) {
-      return res.status(404).send("User not found");
+  con.query(`INSERT IGNORE INTO users (user_id, name, profile_pic, bio) VALUES (?, ?, ?, ?)`, [userId, username, pfp, bio], function(err, result){
+    if(err){
+      console.error('error creating user:', err);
+      return res.send(500).send('Error creating user')
     }
- 
-    // Send the user data back
-    res.json(userData);
-});
+    console.log('User Created:', result);
+    res.status(201).send(JSON.stringify('User created successfully'));
+  })
+})
 
 app.post("/api/createpost", validateToken, async(req,res)=>{
   const accessToken = req.headers.authorization?.split(" ")[1]
@@ -126,13 +140,14 @@ app.post("/api/createpost", validateToken, async(req,res)=>{
   if (!accessToken) {
     return res.status(401).send("Missing token");
   }
+  const username = req.name
   const userId = req.userId; //req.userId comes from the validateToken middleware function
   const postText = req.body.postText;
-  const postContent = req.body.image;
-  con.query(`INSERT INTO post (user_id, post_text, post_content) VALUES (?, ?, ?)`, [userId, postText, postContent], function(err, result) {
+  const postImage = req.body.image;
+  con.query(`INSERT INTO post (user_id, name, post_text, post_image) VALUES (?, ?, ?, ?)`, [userId, username, postText, postImage], function(err, result) {
     if (err) {
       console.error('Error inserting post:', err);
-      return res.status(500).send('Error inserting post');
+      return res.status(500).send('Error inserting post, do you exist?');
     }
     console.log('Post inserted:', result);
     res.status(201).send(JSON.stringify('Post created successfully'));
