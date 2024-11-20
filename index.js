@@ -18,7 +18,24 @@ const client = new OAuth2Client(process.env.CLIENT_ID);
 
 //we will need GET and POST for comments -- angel
 //we will need GET, PUT, and POST for profile bios
+const connectionConfig = {
+  host: process.env.DB_HOST || "Cmac24",
+  port: process.env.DB_PORT || 3306,
+  user: process.env.DB_USER || DB_USER,
+  password: process.env.DB_PASSWORD || DB_PASSWORD,
+  database: process.env.DB_DATABASE || "BCSocial",
+};
 
+const con = mysql.createConnection(connectionConfig);
+
+con.connect(function (err) {
+  if (err) throw err;
+  console.log("connected to mysql, database:" + connectionConfig.database);
+});
+con.query("USE BCSocial", function (err, result) {
+  if (err) throw err;
+  console.log("Using jobSite database");
+});
 app.get("/api/test", (req, res) => {
   console.log(req.method + " request for " + req.url);
   res.send({ message: "test api" });
@@ -33,11 +50,6 @@ app.get("/api/test", (req, res) => {
     ...
     })
 */
-
-
-
-
-
 
 //use this to ensure valid @bethelks domain
 // ensure user is who they say they are
@@ -66,6 +78,8 @@ const validateToken = async (req, res, next) => {
     console.log("error here");
     return res.status(401).send("unable to authenticate email domain");
   }
+
+
   try {
     const response = await fetch(
       `https://oauth2.googleapis.com/tokeninfo?access_token=${token}`
@@ -77,9 +91,10 @@ const validateToken = async (req, res, next) => {
     }
 
     const tokenInfo = await response.json();
-    console.log(tokenInfo)
+    //console.log(tokenInfo)
+    console.log(tokenInfo.sub)
 
-    req.user = tokenInfo; // Attach token info to the request object
+    req.userId = tokenInfo.sub; // Attach token info to the request object
     next(); // Proceed to the next middleware or route handler
   } catch (error) {
     console.error("Token validation error:", error);
@@ -100,10 +115,29 @@ app.post("/api/authtest", validateToken, async (req, res) => {
     if (!userData) {
       return res.status(404).send("User not found");
     }
-
+ 
     // Send the user data back
     res.json(userData);
 });
+
+app.post("/api/createpost", validateToken, async(req,res)=>{
+  const accessToken = req.headers.authorization?.split(" ")[1]
+
+  if (!accessToken) {
+    return res.status(401).send("Missing token");
+  }
+  const userId = req.userId; //req.userId comes from the validateToken middleware function
+  const postText = req.body.postText;
+  const postContent = req.body.image;
+  con.query(`INSERT INTO post (user_id, post_text, post_content) VALUES (?, ?, ?)`, [userId, postText, postContent], function(err, result) {
+    if (err) {
+      console.error('Error inserting post:', err);
+      return res.status(500).send('Error inserting post');
+    }
+    console.log('Post inserted:', result);
+    res.status(201).send(JSON.stringify('Post created successfully'));
+  });
+})
 
 const getUserData = async () => {
   const userId = "239074623784";

@@ -57,7 +57,7 @@ action	VARCHAR
 timestamp	TIMESTAMP	
 Primary Key	(user_id, post_id, action)	Composite key */
 con.query(`CREATE TABLE IF NOT EXISTS users(
-    user_id INT PRIMARY KEY,
+    user_id VARCHAR(255) PRIMARY KEY,
     name VARCHAR(50) NOT NULL,
     profile_pic VARCHAR(255),
     bio LONGTEXT,
@@ -67,7 +67,7 @@ con.query(`CREATE TABLE IF NOT EXISTS users(
     })
 con.query(`CREATE TABLE IF NOT EXISTS post(
     post_id INT AUTO_INCREMENT PRIMARY KEY ,
-    user_id INT NOT NULL,
+    user_id VARCHAR(255) NOT NULL,
     timestamp TIMESTAMP DEFAULT NOW(),
     post_text LONGTEXT,
     post_content VARCHAR(255),
@@ -77,7 +77,7 @@ con.query(`CREATE TABLE IF NOT EXISTS post(
         console.log('created posts table', res)
     })
 con.query(`CREATE TABLE IF NOT EXISTS Post_User (
-    user_id INT,                            -- Foreign Key referencing User
+    user_id VARCHAR(255),                            -- Foreign Key referencing User
     post_id INT,                            -- Foreign Key referencing Post
     action VARCHAR(20),                     -- Type of action (e.g., 'like', 'share')
     timestamp TIMESTAMP DEFAULT NOW(), -- When the action occurred
