@@ -6,7 +6,7 @@ const cors = require("cors");
 app.use(cors());
 
 const connectionConfig = {
-  host: process.env.DB_HOST || "Cmac24",
+  host: "mysql_server",
   port: process.env.DB_PORT || 3306,
   user: process.env.DB_USER || DB_USER,
   password: process.env.DB_PASSWORD || DB_PASSWORD,
@@ -57,27 +57,32 @@ action	VARCHAR
 timestamp	TIMESTAMP	
 Primary Key	(user_id, post_id, action)	Composite key */
 con.query(`CREATE TABLE IF NOT EXISTS users(
-    user_id INT PRIMARY KEY,
-    name VARCHAR(50) NOT NULL,
-    profile_pic VARCHAR(255),
+    user_id VARCHAR(255) PRIMARY KEY,
+    name VARCHAR(50),
+    profile_pic LONGTEXT,
     bio LONGTEXT,
-    banned INT NOT NULL DEFAULT 0)`, function(err, res){ //if banned == 1, then the user is banned and do not allow them to do anything
+    banned INT NOT NULL DEFAULT 0,
+    administrator INT NOT NULL DEFAULT 0,
+    UNIQUE KEY (name)
+    )`, function(err, res){ //if banned == 1, then the user is banned and do not allow them to do anything
         if(err) throw err;
         console.log('created table users', res)
     })
 con.query(`CREATE TABLE IF NOT EXISTS post(
     post_id INT AUTO_INCREMENT PRIMARY KEY ,
-    user_id INT NOT NULL,
+    user_id VARCHAR(255) NOT NULL,
+    name VARCHAR(50),
     timestamp TIMESTAMP DEFAULT NOW(),
     post_text LONGTEXT,
-    post_content VARCHAR(255),
+    post_image LONGTEXT,
     like_number INT DEFAULT 0,
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE)`, function(err, res){
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (name) REFERENCES users(name) ON DELETE CASCADE)`, function(err, res){
         if(err) throw err;
         console.log('created posts table', res)
     })
 con.query(`CREATE TABLE IF NOT EXISTS Post_User (
-    user_id INT,                            -- Foreign Key referencing User
+    user_id VARCHAR(255),                            -- Foreign Key referencing User
     post_id INT,                            -- Foreign Key referencing Post
     action VARCHAR(20),                     -- Type of action (e.g., 'like', 'share')
     timestamp TIMESTAMP DEFAULT NOW(), -- When the action occurred
@@ -125,7 +130,7 @@ const posts = [
 ];
 
 posts.forEach(post => {
-    con.query('INSERT INTO post (user_id, post_text, post_content) VALUES (?, ?, ?)', post, function(err, res) {
+    con.query('INSERT INTO post (user_id, post_text, post_image) VALUES (?, ?, ?)', post, function(err, res) {
         if (err) throw err;
         console.log('Inserted post', res);
     });
