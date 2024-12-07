@@ -5,20 +5,21 @@ import LoginPage from './components/LoginPage';
 import ProfilePage from './components/ProfilePage';
 import Error from './components/Modals/Error';
 import Settings from './components/Modals/Settings';
-import { AuthProvider } from './context/Loggedin';
+import { HomePageProvider } from './context/homepagecontext';
+//import { AuthProvider } from './context/Loggedin';
 function App() {
   return (
-    <AuthProvider>
+    <HomePageProvider>
     <Router>
       <Routes>
         <Route path="/" element={<LoginPage />} />
         <Route path="/home" element={<HomePage />} />
-        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/profile/:userid/:username" element={<ProfilePage />} />
         <Route path="/error" element={<Error />} />
         <Route path="/settings" element={<Settings />} />
       </Routes>
     </Router>
-    </AuthProvider>
+    </HomePageProvider>
   )
 }
 

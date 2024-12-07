@@ -53,7 +53,7 @@ export const AuthProvider: React.FC<LoggedInProviderProps> = ({ children }) => {
             setUserInfo(userInfoData);
             console.log('User Info:', userInfoData);
             try{
-                const response = await fetch('http://localhost:3000/api/createuser', {
+                const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/createuser`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -96,6 +96,13 @@ export const AuthProvider: React.FC<LoggedInProviderProps> = ({ children }) => {
         if (token) {
             setIsLoggedIn(true);
         }
+        const handleBeforeUnload = () =>{
+            localStorage.removeItem('authToken')
+        }
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload)
+        }
     }, []);
 
     const updateUserProfile = async () => {
@@ -105,30 +112,7 @@ export const AuthProvider: React.FC<LoggedInProviderProps> = ({ children }) => {
             throw new Error('No token found');
         }
 
-        const response = await fetch('http://localhost:3000/api/authtest', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ profileData: 'new profile data' })
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to update profile');
-        }
-
-        const data = await response.json();
-        console.log('Profile updated:', data);
-        return data;
-    };
-    const createUser = async () => {
-        const token = localStorage.getItem('authToken');
-        if (!token) {
-            throw new Error('No token found');
-        }
-
-        const response = await fetch('http://localhost:3000/api/createuser', {
+        const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/authtest`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -147,23 +131,7 @@ export const AuthProvider: React.FC<LoggedInProviderProps> = ({ children }) => {
     };
     
 
-    /*{isLoggedIn ? (
-                <div>
-                    <button onClick={handleLogout}>Logout</button>
-                    {userInfo && (
-                        <>
-                            <p>{userInfo.name}</p>
-                            <p>{userInfo.email}</p>
-                            <img src={userInfo.picture} alt={userInfo.name} />
-                            <button onClick={updateUserProfile}>Update Profile</button>
-                            <button onClick={createUser}>Create User</button>
-                        </>
-                    )}
-                </div>
-            ) : (
-                <button onClick={() =>login()}>Login with Google</button>
-            )}
-            {children} */
+
     return (
         <AuthContext.Provider value={{ isLoggedIn, setIsLoggedIn, userInfo, login, logout, updateUserProfile }}>
             {children}
