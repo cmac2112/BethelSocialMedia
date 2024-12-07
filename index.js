@@ -5,7 +5,6 @@ const app = express();
 const cors = require("cors");
 const path = require("path");
 const multer = require('multer');
-const { OAuth2Client } = require("google-auth-library");
 
 app.use(cors());
 app.use(express.json());
@@ -26,10 +25,9 @@ const GOOGLE_USERINFO_API = "https://www.googleapis.com/oauth2/v3/userinfo";
 // will need some sort of middleware to handle files in POST requests
 // multer is the middleware, storing files is another issue
 
-//we will need GET and POST for comments -- angel
 //we will need GET, PUT, and POST for profile bios
 const connectionConfig = {
-  host: process.env.DB_HOST || "Cmac24",
+  host: process.env.DB_HOST || "localhost",
   port: process.env.DB_PORT || 3306,
   user: process.env.DB_USER || DB_USER,
   password: process.env.DB_PASSWORD || DB_PASSWORD,
@@ -44,19 +42,12 @@ con.connect(function (err) {
 });
 con.query("USE BCSocial", function (err, result) {
   if (err) throw err;
-  console.log("Using jobSite database");
+  console.log("Using bcsocial database");
 });
 
 
-//get request for posts would look something like
-/*app.get('/whatever/:poster, (req, res) =>{
-    const sql = SELECT * FROM posts WHERE poster = ?
-    const values = whatever value is passed into the url /:poster
-    con.query(sql, values)...
-    res.send(rows)
-    ...
-    })
-*/
+//######################################################################
+//start of middlewares
 
 //use this to ensure valid @bethelks domain
 // ensure user is who they say they are
@@ -64,7 +55,7 @@ const validateToken = async (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1];
   if (!token) {
     console.log("missing token");
-    return res.status(401).send("Missing token");
+    return res.status(401).send({"message":"Missing token"});
   }
   try {
     const userInfoResponse = await fetch(GOOGLE_USERINFO_API, {
@@ -74,16 +65,16 @@ const validateToken = async (req, res, next) => {
     });
 
     if (!userInfoResponse.ok) {
-      return res.status(401).send("Invalid token");
+      return res.status(401).send({"message":"Invalid token"});
     }
 
     const userInfo = await userInfoResponse.json();
     if (userInfo.hd !== "bethelks.edu") {
-      return res.status(401).send("invalid email domain");
+      return res.status(401).send({"message":"invalid email domain"});
     }
   } catch (error) {
     console.log("error here");
-    return res.status(401).send("unable to authenticate email domain");
+    return res.status(401).send({"message":"unable to authenticate email domain"});
   }
 
 
@@ -94,7 +85,7 @@ const validateToken = async (req, res, next) => {
 
     if (!response.ok) {
       console.log("invalid token, response failed");
-      return res.status(401).send("Invalid token");
+      return res.status(401).send({"message":"Invalid token"});
     }
 
     const tokenInfo = await response.json();
@@ -112,14 +103,16 @@ const validateToken = async (req, res, next) => {
     next(); // Proceed to the next middleware or route handler
 }catch(error){
   console.error("userInfo error", error);
-  return res.status(402).send("failed to get user info")
+  return res.status(402).send({"message":"failed to get user info"})
 }
   } catch (error) {
     console.error("Token validation error:", error);
-    return res.status(401).send("Invalid token");
+    return res.status(401).send({"message":"Invalid token"});
   }
 };
-
+//end of middlewares
+//########################################################################################
+//post endpoints
 app.get("/api/posts", validateToken, (req, res)=>{
   const limit = parseInt(req.query.limit) || 5;
   const offset = parseInt(req.query.offset) || 0;
@@ -139,6 +132,48 @@ app.get("/api/posts", validateToken, (req, res)=>{
   })
 })
 
+app.get("/api/posts/:userid", validateToken, (req, res)=>{
+  const limit = parseInt(req.query.limit) || 5;
+  const offset = parseInt(req.query.offset) || 0;
+
+  const sql = `
+  SELECT post.*, users.profile_pic
+  FROM post
+  INNER JOIN users ON post.user_id = users.user_id WHERE post.user_id = ? ORDER BY post.timestamp DESC LIMIT ? OFFSET ?`;
+
+  con.query(sql, [req.params.userid, limit, offset], function(err, result){
+    if(err){
+      console.error('error fetching posts', err);
+      res.status(500).send({"message":"internal server error"})
+    }
+    res.json(result);
+  })
+})
+
+
+//this endpoint allows a user to create a post on the site
+app.post('/api/createpost', validateToken, upload.single('image'), async (req, res) => {
+  const userId = req.userId;
+  const username = req.name;
+  const postText = req.body.postText;
+  const postImage = req.file ? `/uploads/${req.file.filename}` : null;
+
+  con.query('INSERT INTO post (user_id, name, post_text, post_image) VALUES (?, ?, ?, ?)', [userId, username, postText, postImage], function (err, result) {
+    if (err) {
+      console.error('Error inserting post:', err);
+      return res.status(500).send('Error inserting post');
+    }
+    console.log('Post inserted:', result);
+    res.status(201).send({"message":"Post created successfully"});
+  });
+});
+//end of posts endpoints
+//#######################################################################
+//profile endpoints
+
+
+
+// this will automatically create a user in our data base when they log in for the first time
 app.post("/api/createuser", validateToken, async(req,res)=>{
   const accessToken = req.headers.authorization?.split(" ")[1]
 
@@ -160,21 +195,7 @@ app.post("/api/createuser", validateToken, async(req,res)=>{
   })
 })
 
-app.post('/api/createpost', validateToken, upload.single('image'), async (req, res) => {
-  const userId = req.userId;
-  const username = req.name;
-  const postText = req.body.postText;
-  const postImage = req.file ? `/uploads/${req.file.filename}` : null;
 
-  con.query('INSERT INTO post (user_id, name, post_text, post_image) VALUES (?, ?, ?, ?)', [userId, username, postText, postImage], function (err, result) {
-    if (err) {
-      console.error('Error inserting post:', err);
-      return res.status(500).send('Error inserting post');
-    }
-    console.log('Post inserted:', result);
-    res.status(201).send('Post created successfully');
-  });
-});
 app.get('/proxy/uploads/:filename', validateToken, (req, res) => {
   const filename = req.params.filename;
   const filePath = path.join(__dirname, 'uploads', filename);

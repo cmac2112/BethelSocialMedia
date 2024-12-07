@@ -1,0 +1,2 @@
+GRANT ALL PRIVILEGES ON BCSocial.* TO 'dbuser'@'%';
+FLUSH PRIVILEGES;

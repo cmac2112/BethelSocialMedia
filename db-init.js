@@ -6,7 +6,7 @@ const cors = require("cors");
 app.use(cors());
 
 const connectionConfig = {
-  host: process.env.DB_HOST || "Cmac24",
+  host: "mysql_server",
   port: process.env.DB_PORT || 3306,
   user: process.env.DB_USER || DB_USER,
   password: process.env.DB_PASSWORD || DB_PASSWORD,
