@@ -62,6 +62,7 @@ con.query(`CREATE TABLE IF NOT EXISTS users(
     profile_pic LONGTEXT,
     bio LONGTEXT,
     banned INT NOT NULL DEFAULT 0,
+    administrator INT NOT NULL DEFAULT 0,
     UNIQUE KEY (name)
     )`, function(err, res){ //if banned == 1, then the user is banned and do not allow them to do anything
         if(err) throw err;

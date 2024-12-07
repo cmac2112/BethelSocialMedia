@@ -1,7 +1,5 @@
-import React from "react";
-import pfp from "../../assets/profilepic.jpg";
-import test from "../../assets/testimage.jpg"
-import { Link, useNavigate } from "react-router-dom";
+import React, {useEffect} from "react";
+import { Link } from "react-router-dom";
 //import bigimg from "../../assets/img.jpg"
 
 /*im thinking that we may need a post component like this so we can reuse it on the
@@ -13,17 +11,17 @@ interface PostComponentProps {
   pfp: string;
   text: string;
   likes: number;
-
+  date: string;
+  image?: string;
 }
 const PostComponent: React.FC<PostComponentProps> = ({
   username,
   text,
   likes,
-  //image
-  //date
-  //pfp
+  image,
+  date,
+  pfp,
 }) => {
-  const navigate = useNavigate();
   //this will need props, they should come from the
   //parent component, this is a child of to determine what
   //posts we need to show
@@ -40,6 +38,34 @@ const PostComponent: React.FC<PostComponentProps> = ({
 
     then map the data to an array and iterate through generating new html (jsx) elements filling in the data
      */
+    const baseURL = import.meta.env.VITE_REACT_APP_BASE_URL
+    const [imageUrl, setImageUrl] = React.useState<string | undefined>(undefined);
+
+    useEffect(() => {
+      const fetchImage = async () => {
+        if (image) {
+          const token = localStorage.getItem('authToken');
+          try {
+            const response = await fetch(`${baseURL}/proxy${image}`, {
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
+            });
+            if (response.ok) {
+              const blob = await response.blob();
+              const url = URL.createObjectURL(blob);
+              setImageUrl(url);
+            } else {
+              console.error('Failed to fetch image');
+            }
+          } catch (error) {
+            console.error('Error fetching image:', error);
+          }
+        }
+      };
+  
+      fetchImage();
+    }, [image, baseURL]);
   return (
     <div id="post-container" className="p-5 rounded-xl bg-white border-b-8 border-gray-300">
       <div id="pfp-username" className="flex border-b-2 border-maroon">
@@ -56,16 +82,22 @@ const PostComponent: React.FC<PostComponentProps> = ({
         </div>
         
       </div>
-      <div id="image-container" className="flex justify-center border-b-2">
-          <img src={test} className="h-60 md:h-screen" />
+      {image && (
+        <div id="image-container" className="flex justify-center border-b-2">
+          <img
+            src={imageUrl}
+            className="h-60 md:h-screen"
+            alt="Post"
+          />
         </div>
+      )}
       <div id="bottom-bar" className="flex justify-between py-1">
         <div className="flex">
        <img src={pfp} className="h-5 w-5 rounded-full" />
        <p className="text-gray-400 px-1">{likes}</p>
        </div>
        <div id="date">
-          <p>Posted: 1/1/2024</p>
+{date}
        </div>
       </div>
     </div>

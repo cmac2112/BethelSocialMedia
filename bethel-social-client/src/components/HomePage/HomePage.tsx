@@ -4,7 +4,17 @@ import Layout from '../Layout'
 import { useAuth } from '../../context/Loggedin'
 import CreatePost from '../CreatePost'
 import { Link } from 'react-router-dom'
+interface Post {
+  post_id: number,
+  name: string,
+  profile_pic: string,
+  post_text: string,
+  likes: number,
+  timestamp: string,
+  post_image: string,
+}
 const HomePage = () => {
+  /*
   const posts = [
     {
       username: 'testuser1',
@@ -67,29 +77,49 @@ const HomePage = () => {
       likes: 52
     }
   ];
+  */
   const { isLoggedIn, userInfo } = useAuth();
   console.log(isLoggedIn, userInfo)
+  const [posts, setPosts] = React.useState<Post[]>([]);
+  const [offset, setOffset] = React.useState(0);
+  const [loading, setLoading] = React.useState(false);
 
   const getPosts = async () =>{ //add extra functionality later to make only certain posts show up to reduce load times
+    setLoading(true);
+    try{
     const token = localStorage.getItem('authToken');
-    const response = await fetch('http://localhost:3000/api/getposts', {
+    const response = await fetch(`http://localhost:3000/api/posts?limit=5&offset=${offset}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
-      }
+      },
     });
     const data = await response.json();
-    console.log(JSON.stringify(data))
+    console.log(data)
+    setPosts((prevPosts) => [...prevPosts, ...data]);
+    setOffset((prevOffset) => prevOffset + 5);
 
+  }catch(err){
+    console.log(err)
   }
-  useEffect(() => {
-    getPosts();
-  },[])
+  setLoading(false);
+}
 
-  const postsList = posts.map((post, index) => {
-    return <PostComponent key={index} username={post.username} pfp={post.pfp} text={post.text} likes={post.likes} />
-  })
+const handleScroll = () => {
+  if (window.innerHeight + document.documentElement.scrollTop >= document.documentElement.offsetHeight - 1 && !loading) {
+    getPosts();
+  }
+};
+useEffect(() => {
+  getPosts();
+}, []);
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+
+  },[loading]);
+
   return (
     <Layout>
       {isLoggedIn ? (
@@ -98,8 +128,13 @@ const HomePage = () => {
         <CreatePost />
         </div>
     <div className="font-semibold">
-        {postsList}
+        {posts.map((post) =>(
+          <div key={post.post_id}>
+          <PostComponent username={post.name} pfp={post.profile_pic} text={post.post_text} likes={post.likes} date={post.timestamp} image={post.post_image} />
+          </div>
+        ))}
     </div>
+    {loading && <p>Loading...</p>}
     </div>) : (<div className="flex justify-center bg-gray-200 md:p-24 text-3xl text-center">
     <div className="font-semibold">
         <h2>You must be logged into a valid @bethelks.edu account to use this site</h2>

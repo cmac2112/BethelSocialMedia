@@ -5,19 +5,26 @@ const CreatePost = () => {
     const [charCount, setCharCount] = React.useState(0);
     const [postText, setPostText] = React.useState('');
     const [error, setError] = React.useState(''); //use this to trigger error state to render error component
- 
+    const [image, setImage] = React.useState<File | null>(null); //use this to store image data
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      if(e.target.files && e.target.files[0]){
+        setImage(e.target.files[0]);
+      }
+    };
+
     const sendPost = async () =>{
       const token = localStorage.getItem('authToken');
+      const formData = new FormData();
+      formData.append('postText', postText);
+      if (image) {
+        formData.append('image', image);
+      }
       const response = await fetch('http://localhost:3000/api/createpost', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}` //this will need to be validated on the server through middleware `validateToken`
         },
-        body: JSON.stringify({
-          postText: postText,
-          image: 'testimage.jpg'
-        })
+        body: formData,
       });
       const data = await response.json();
       console.log(data)
@@ -38,14 +45,18 @@ const CreatePost = () => {
       <h1 className="p-2 flex justify-center">Create a post</h1>
       <div className='flex justify-center p-2'>
       <textarea className="w-3/4 p-2 bg-gray-100 rounded-xl" placeholder="What's on your mind?" onChange={(e) => {
-        setCharCount(e.target.value.length);
+        setCharCount(1000 - e.target.value.length);
         setPostText(e.target.value);
       }}></textarea>
       </div>
       <p>{charCount}</p>
+      {charCount < 0 && <p className='text-maroon'>Character limit reached</p>}
       <div className="flex justify-between p-2">
-        <button className="">img here</button>
-      <button className="p-2 bg-maroon text-white rounded-xl" onClick={() => sendPost()}>Post</button>
+        <input type="file" onChange={handleImageChange} />
+        <p>{image?.name}</p>
+        <p>{error}</p>
+        <p>Image</p>
+      <button className="p-2 bg-maroon text-white rounded-xl" onClick={sendPost}>Post</button>
       </div>
     </div>
   )

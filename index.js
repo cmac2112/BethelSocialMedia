@@ -3,15 +3,25 @@ const mysql = require("mysql");
 const express = require("express");
 const app = express();
 const cors = require("cors");
+const path = require("path");
+const multer = require('multer');
+const { OAuth2Client } = require("google-auth-library");
+
 app.use(cors());
 app.use(express.json());
-const path = require("path");
-const bodyParser = require("body-parser");
-app.use(bodyParser.json());
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/');
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname));
+  },
+});
+const upload = multer({ storage });
 
 const GOOGLE_USERINFO_API = "https://www.googleapis.com/oauth2/v3/userinfo";
-const { OAuth2Client } = require("google-auth-library");
-const client = new OAuth2Client(process.env.CLIENT_ID);
+//const client = new OAuth2Client(process.env.CLIENT_ID);
 
 // will need some sort of middleware to handle files in POST requests
 // multer is the middleware, storing files is another issue
@@ -36,10 +46,7 @@ con.query("USE BCSocial", function (err, result) {
   if (err) throw err;
   console.log("Using jobSite database");
 });
-app.get("/api/test", (req, res) => {
-  console.log(req.method + " request for " + req.url);
-  res.send({ message: "test api" });
-});
+
 
 //get request for posts would look something like
 /*app.get('/whatever/:poster, (req, res) =>{
@@ -113,6 +120,25 @@ const validateToken = async (req, res, next) => {
   }
 };
 
+app.get("/api/posts", validateToken, (req, res)=>{
+  const limit = parseInt(req.query.limit) || 5;
+  const offset = parseInt(req.query.offset) || 0;
+
+  const sql = `
+    SELECT post.*, users.profile_pic 
+    FROM post 
+    INNER JOIN users ON post.user_id = users.user_id 
+    ORDER BY post.timestamp DESC 
+    LIMIT ? OFFSET ?`;
+  con.query(sql, [limit, offset], function (err, result){
+    if(err){
+      console.error('error fetching posts', err);
+      res.status(500).send('error fetching posts');
+    }
+    res.json(result)
+  })
+})
+
 app.post("/api/createuser", validateToken, async(req,res)=>{
   const accessToken = req.headers.authorization?.split(" ")[1]
 
@@ -134,30 +160,26 @@ app.post("/api/createuser", validateToken, async(req,res)=>{
   })
 })
 
-app.post("/api/createpost", validateToken, async(req,res)=>{
-  const accessToken = req.headers.authorization?.split(" ")[1]
-
-  if (!accessToken) {
-    return res.status(401).send("Missing token");
-  }
-  const username = req.name
-  const userId = req.userId; //req.userId comes from the validateToken middleware function
+app.post('/api/createpost', validateToken, upload.single('image'), async (req, res) => {
+  const userId = req.userId;
+  const username = req.name;
   const postText = req.body.postText;
-  const postImage = req.body.image;
-  con.query(`INSERT INTO post (user_id, name, post_text, post_image) VALUES (?, ?, ?, ?)`, [userId, username, postText, postImage], function(err, result) {
+  const postImage = req.file ? `/uploads/${req.file.filename}` : null;
+
+  con.query('INSERT INTO post (user_id, name, post_text, post_image) VALUES (?, ?, ?, ?)', [userId, username, postText, postImage], function (err, result) {
     if (err) {
       console.error('Error inserting post:', err);
-      return res.status(500).send('Error inserting post, do you exist?');
+      return res.status(500).send('Error inserting post');
     }
     console.log('Post inserted:', result);
-    res.status(201).send(JSON.stringify('Post created successfully'));
+    res.status(201).send('Post created successfully');
   });
-})
-
-const getUserData = async () => {
-  const userId = "239074623784";
-  return { userId, name: "test", email: "random@random.com" };
-};
+});
+app.get('/proxy/uploads/:filename', validateToken, (req, res) => {
+  const filename = req.params.filename;
+  const filePath = path.join(__dirname, 'uploads', filename);
+  res.sendFile(filePath);
+});
 // Serve static files from the React app, this allows us to not have 3 containers running and makes it easier to host
 app.use(express.static(path.join(__dirname, "./bethel-social-client/dist")));
 
