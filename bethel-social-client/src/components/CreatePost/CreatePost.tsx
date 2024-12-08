@@ -65,10 +65,9 @@ const CreatePost: FC<CreatePostProps> = ({ getposts }) => {
       </div>
       <p>{charCount}</p>
       {charCount < 0 && <p className="text-maroon">Character limit reached</p>}
-      <div className="flex justify-between p-2">
+      <div className="flex md:justify-between md:p-2 ">
         <input type="file" onChange={handleImageChange} />
         <p>{image?.name}</p>
-        <p>Image</p>
         <button
           className="p-2 bg-maroon text-white rounded-xl"
           onClick={sendPost}

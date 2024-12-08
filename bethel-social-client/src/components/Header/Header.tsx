@@ -18,7 +18,7 @@ const Header = () => {
           </Link>
         )}
         {isLoggedIn && (
-          <Link to="/profile" className="p-2 text-white font-semibold text-xl md:text-2xl">
+          <Link to={`/profile/${userInfo.sub}/${userInfo.name}`} className="p-2 text-white font-semibold text-xl md:text-2xl">
             Profile
           </Link>
         )}

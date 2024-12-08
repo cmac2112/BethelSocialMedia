@@ -52,7 +52,9 @@ export const AuthProvider: React.FC<LoggedInProviderProps> = ({ children }) => {
             const userInfoData = await userInfoResponse.json();
             setUserInfo(userInfoData);
             console.log('User Info:', userInfoData);
+            console.log('before creating new logged in user')
             try{
+                console.log('creating new logged in user')
                 const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/createuser`, {
                     method: 'POST',
                     headers: {

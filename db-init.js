@@ -6,11 +6,10 @@ const cors = require("cors");
 app.use(cors());
 
 const connectionConfig = {
-  host: "mysql_server",
+    host: '34.29.241.52',
   port: process.env.DB_PORT || 3306,
   user: process.env.DB_USER || DB_USER,
   password: process.env.DB_PASSWORD || DB_PASSWORD,
-  database: process.env.DB_DATABASE || "BCSocial",
 };
 
 const con = mysql.createConnection(connectionConfig);

@@ -14,6 +14,7 @@ RUN npm install
 COPY . .
 
 # Build the frontend.
+RUN node db-init.js
 RUN npm run build:frontend
 
 RUN ls -la /usr/src/app/bethel-social-client/dist

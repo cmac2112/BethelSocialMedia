@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect } from "react";
 import Layout from "../Layout";
-import pfp from "../../assets/profilepic.jpg";
 import settingspic from "../../assets/settings.png";
 import PostComponent from "../PostComponent";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../../context/Loggedin";
+import { Link } from "react-router-dom";
 interface Post {
   post_id: number,
   name: string,
@@ -21,8 +21,11 @@ const ProfilePage = () => {
   const offset = useRef(0);
   const [loading, setLoading] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
+  const [profilePic, setProfilePic] = useState("");
+  const [changingBio, setChangingBio] = useState(false);
   const { userid, username } = useParams();
   const { userInfo, isLoggedIn } = useAuth();
+
   console.log(userid)
 
   const checkIfOwner = () =>{ //check to see if the user owns the profile
@@ -40,8 +43,29 @@ const ProfilePage = () => {
 
   useEffect(() =>{
     checkIfOwner();
+    getBio();
+    getUserPfp();
   }, [])
 
+  const getBio = async () => {
+    console.log('get bio is running')
+    try{
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/bio/${userid}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+      });
+      const data = await response.json();
+      console.log('bio data', data[0].bio)
+      setBio(data[0].bio);
+    }catch(err){
+      console.log(err)
+      //use seth's error popup
+  }
+}
   const getPosts = async () =>{ //add extra functionality later to make only certain posts show up to reduce load times
     setLoading(true);
     console.log('get posts is running')
@@ -67,9 +91,10 @@ const ProfilePage = () => {
 }
 
 const changeBio = async () => {
+    changingBio ? setChangingBio(false) : setChangingBio(true);
     const token = localStorage.getItem('authToken');
     try{
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/bio`, {
+      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/bio/${userid}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -78,14 +103,31 @@ const changeBio = async () => {
       body: JSON.stringify({bio: bio})
     });
     const data = await response.json();
-    setBio(data.bio);
-    console.log(data);
+    console.log(data)
     } catch (err) {
       console.log(err);
       //use seth's error popup
     }
 }
 
+const getUserPfp = async () => {
+  try{
+    const token = localStorage.getItem('authToken');
+    const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/userpfp/${userid}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+    }
+  });
+  const data = await response.json();
+  console.log('pfp data',data)
+  setProfilePic(data[0].profile_pic);
+}catch(err){
+  console.log(err)
+}
+
+}
 
 const handleScroll = () => {
   if (window.innerHeight + document.documentElement.scrollTop >= document.documentElement.offsetHeight - 1 && !loading) {
@@ -105,19 +147,20 @@ useEffect(() => {
   //obviously change images later
   return (
     <Layout>
+      {isLoggedIn ? (
+        <>
       <div
         className="container max-w-full flex justify-evenly bg-gray-50 relative border-b-2 p-1"
         id="pfp-title-container"
       >
         <div className="md:p-10">
           <img
-            src={pfp}
+            src={profilePic}
             className="rounded-full h-40 w-40 border-4 border-maroon shadow-2xl"
           />
         </div>
         <div className="p-10">
-          <h2 className=" text-xl md:text-7xl font-semibold">Welcome</h2>
-          <h2 className="text-end text-xl font-semibold">{username}</h2>
+          <h2 className="text-xl md:text-7xl font-semibold">{username}</h2>
         </div>
         <div className="justify-self-end" id="settings">
           {isOwner && (
@@ -134,7 +177,9 @@ useEffect(() => {
         <div className="text-pretty bg-slate-50 p-5 rounded-xl">
         {bio}
         </div>
-        <button onClick={changeBio} className="bg-maroon text-white p-2 rounded-xl">Change Bio</button>
+        {changingBio ? <textarea className="border-2 border-x-blue-500" placeholder="Enter your bio here"
+        value={bio} onChange={(e)=>setBio(e.target.value)}></textarea> : null}
+        {isOwner ? <button onClick={changeBio} className="bg-maroon text-white p-2 rounded-xl">Change Bio</button> : null}
         </div>
 
       </div>
@@ -147,6 +192,13 @@ useEffect(() => {
       ))}
         {/* will need props for pfp, date posted, image if it contains an image... */}
       </div>
+      </>
+      ) : (<div className="flex justify-center bg-gray-200 md:p-24 text-3xl text-center">
+        <div className="font-semibold">
+            <h2>You must be logged into a valid @bethelks.edu account to use this site</h2>
+            <Link className="text-blue-500" to="/info">Learn why</Link>
+        </div>
+        </div>)}
     </Layout>
   );
 };

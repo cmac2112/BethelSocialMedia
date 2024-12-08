@@ -26,14 +26,23 @@ const GOOGLE_USERINFO_API = "https://www.googleapis.com/oauth2/v3/userinfo";
 // multer is the middleware, storing files is another issue
 
 //we will need GET, PUT, and POST for profile bios
+/*
 const connectionConfig = {
-  host: process.env.DB_HOST || "localhost",
+  host: process.env.DB_HOST || '34.29.241.52',
   port: process.env.DB_PORT || 3306,
   user: process.env.DB_USER || DB_USER,
   password: process.env.DB_PASSWORD || DB_PASSWORD,
   database: process.env.DB_DATABASE || "BCSocial",
 };
 
+*/
+const connectionConfig = {
+  host: 'localhost',
+  port: 3306,
+  user: 'dbuser',
+  password: 'michon70',
+  database: "BCSocial",
+};
 const con = mysql.createConnection(connectionConfig);
 
 con.connect(function (err) {
@@ -171,34 +180,48 @@ app.post('/api/createpost', validateToken, upload.single('image'), async (req, r
 //#######################################################################
 //profile endpoints
 //The post stuff for bio
-app.post("api/bio/:userid", validateToken,async(req, res)=>{
-  const userId = req.params.userId;
+app.post("/api/bio/:userid", validateToken,async(req, res)=>{
+  console.log('request for ' + req.url)
+  const userId = req.params.userid;
   const bio = req.body.bio;
   console.log("bio", bio);
   console.log("userId", userId);
 
+  console.log('to the query')
   con.query('UPDATE users SET bio = ? WHERE user_id = ?', [bio, userId], function(err, result){
     if(err){
       console.error('error updating bio:', err);
       return res.status(500).send('Error updating bio');
     }
     console.log('Bio updated:', result);
-    res.status(200).send('Bio updated successfully');
+    res.status(200).send({message:'Bio updated successfully'});
   })
 });
 
 //The get stuff for bio
 app.get("/api/bio/:userid", validateToken, (req, res)=>{
-  const userId = req.params.userId;
-
+  const userId = req.params.userid;
+  console.log(userId)
+  console.log('to the query')
   con.query('SELECT bio FROM users WHERE user_id = ?', [userId], function(err, result){
     if(err){
       console.error('error fetching bio:', err);
       return res.status(500).send('Error fetching bio');
     }
     console.log('Bio fetched:', result);
-    res.json(result);
+    res.send(JSON.stringify(result))
   })
+});
+
+app.get("/api/userpfp/:userid", validateToken, (req, res)=>{
+  const userId = req.params.userid;
+  con.query(`SELECT profile_pic FROM users WHERE user_id = ?`, [userId], function(err, result){
+    if(err){
+      console.error('error fetching', err)
+      return res.status(500).send({error:"error fetching user pfp"})
+    }
+    res.status(200).send(result);
+  });
 });
 
 // this will automatically create a user in our data base when they log in for the first time
