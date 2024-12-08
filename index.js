@@ -170,8 +170,36 @@ app.post('/api/createpost', validateToken, upload.single('image'), async (req, r
 //end of posts endpoints
 //#######################################################################
 //profile endpoints
+//The post stuff for bio
+app.post("api/bio/:userid", validateToken,async(req, res)=>{
+  const userId = req.params.userId;
+  const bio = req.body.bio;
+  console.log("bio", bio);
+  console.log("userId", userId);
 
+  con.query('UPDATE users SET bio = ? WHERE user_id = ?', [bio, userId], function(err, result){
+    if(err){
+      console.error('error updating bio:', err);
+      return res.status(500).send('Error updating bio');
+    }
+    console.log('Bio updated:', result);
+    res.status(200).send('Bio updated successfully');
+  })
+});
 
+//The get stuff for bio
+app.get("/api/bio/:userid", validateToken, (req, res)=>{
+  const userId = req.params.userId;
+
+  con.query('SELECT bio FROM users WHERE user_id = ?', [userId], function(err, result){
+    if(err){
+      console.error('error fetching bio:', err);
+      return res.status(500).send('Error fetching bio');
+    }
+    console.log('Bio fetched:', result);
+    res.json(result);
+  })
+});
 
 // this will automatically create a user in our data base when they log in for the first time
 app.post("/api/createuser", validateToken, async(req,res)=>{
