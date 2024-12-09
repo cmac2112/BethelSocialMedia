@@ -4,6 +4,7 @@ import Layout from '../Layout'
 import { useAuth } from '../../context/Loggedin'
 import CreatePost from '../CreatePost'
 import { Link } from 'react-router-dom'
+import Error from '../Modals/Error'
 interface Post {
   post_id: number,
   name: string,
@@ -20,6 +21,7 @@ const HomePage = () => {
   const posts = useRef<Post[]>([]);
   const offset = useRef(0);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const getPosts = async () =>{ //add extra functionality later to make only certain posts show up to reduce load times
     setLoading(true);
@@ -40,6 +42,8 @@ const HomePage = () => {
 
   }catch(err){
     console.log(err)
+    setError('There was an error loading posts');
+    setTimeout(() => {setError('')}, 5000);
     //use seth's error popup
   }
   setLoading(false);
@@ -71,6 +75,7 @@ useEffect(() => {
     <Layout>
       {isLoggedIn ? (
       <div className="md:px-52 bg-gray-200">
+        {error && <Error error_string={error} />}
         <div className="py-2 ">
         <CreatePost getposts={getPostsAfterUserPosts} />
         </div>

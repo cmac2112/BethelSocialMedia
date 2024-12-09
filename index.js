@@ -26,7 +26,7 @@ const GOOGLE_USERINFO_API = "https://www.googleapis.com/oauth2/v3/userinfo";
 // multer is the middleware, storing files is another issue
 
 //we will need GET, PUT, and POST for profile bios
-/*
+
 const connectionConfig = {
   host: process.env.DB_HOST || '34.29.241.52',
   port: process.env.DB_PORT || 3306,
@@ -35,7 +35,8 @@ const connectionConfig = {
   database: process.env.DB_DATABASE || "BCSocial",
 };
 
-*/
+
+/*
 const connectionConfig = {
   host: 'localhost',
   port: 3306,
@@ -43,6 +44,7 @@ const connectionConfig = {
   password: 'michon70',
   database: "BCSocial",
 };
+*/
 const con = mysql.createConnection(connectionConfig);
 
 con.connect(function (err) {

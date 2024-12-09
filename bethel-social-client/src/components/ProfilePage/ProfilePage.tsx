@@ -5,6 +5,7 @@ import PostComponent from "../PostComponent";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../../context/Loggedin";
 import { Link } from "react-router-dom";
+import Error from "../Modals/Error";
 interface Post {
   post_id: number,
   name: string,
@@ -25,6 +26,7 @@ const ProfilePage = () => {
   const [changingBio, setChangingBio] = useState(false);
   const { userid, username } = useParams();
   const { userInfo, isLoggedIn } = useAuth();
+  const [error, setError] = useState('');
 
   console.log(userid)
 
@@ -85,6 +87,8 @@ const ProfilePage = () => {
 
   }catch(err){
     console.log(err)
+    setError('There was an error loading posts');
+    setTimeout(() => {setError('')}, 5000);
     //use seth's error popup
   }
   setLoading(false);
@@ -125,6 +129,8 @@ const getUserPfp = async () => {
   setProfilePic(data[0].profile_pic);
 }catch(err){
   console.log(err)
+  setError('There was an error loading the profile picture');
+  setTimeout(() => {setError('')}, 5000);
 }
 
 }
@@ -183,6 +189,7 @@ useEffect(() => {
         </div>
 
       </div>
+     {error && ( <Error error_string={error} />)}
 
       <div id="posts-container" className="bg-gray-300 p-4 md:px-36">
       {posts.current.map((post: Post) =>(

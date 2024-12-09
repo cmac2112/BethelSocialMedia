@@ -1,5 +1,6 @@
 import React, { FC } from "react";
 import { useAuth } from "../../context/Loggedin";
+import Error from "../Modals/Error";
 
 interface CreatePostProps {
   getposts: () => void;
@@ -9,6 +10,7 @@ const CreatePost: FC<CreatePostProps> = ({ getposts }) => {
   const [charCount, setCharCount] = React.useState(0);
   const [postText, setPostText] = React.useState("");
   const [image, setImage] = React.useState<File | null>(null); //use this to store image data
+  const [error, setError] = React.useState("");
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -37,6 +39,8 @@ const CreatePost: FC<CreatePostProps> = ({ getposts }) => {
       console.log('get posts should have ran')
     } catch (err) {
       console.log(err);
+      setError("There was an error creating the post");
+      setTimeout(()=>{setError('')}, 5000); //display error message that seth has made
       //display error message that seth has made
     }
   };
@@ -74,7 +78,9 @@ const CreatePost: FC<CreatePostProps> = ({ getposts }) => {
         >
           Post
         </button>
+        
       </div>
+      {error && (<Error error_string={error} />)}
     </div>
   );
 };
