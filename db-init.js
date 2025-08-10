@@ -1,20 +1,21 @@
 require("dotenv").config();
-const mysql = require("mysql");
+const mysql = require("mysql2");
 const express = require("express");
 const app = express();
 const cors = require("cors");
 app.use(cors());
 
+
 const connectionConfig = {
-  host: "mysql_server",
+    host: process.env.DB_HOST || 'localhost',
   port: process.env.DB_PORT || 3306,
-  user: process.env.DB_USER || DB_USER,
-  password: process.env.DB_PASSWORD || DB_PASSWORD,
-  database: process.env.DB_DATABASE || "BCSocial",
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || 'password',
+  insecureAuth: true
 };
 
 const con = mysql.createConnection(connectionConfig);
-
+console.log(con);
 con.connect(function (err) {
   if (err) throw err;
   console.log("connected to mysql, database:" + connectionConfig.database);
@@ -29,33 +30,10 @@ con.query("CREATE DATABASE IF NOT EXISTS BCSocial", function (err, result) {
 });
 con.query("USE BCSocial", function (err, result) {
   if (err) throw err;
-  console.log("Using jobSite database");
+  console.log("Using bcsocial database");
 });
 
-/*
 
-Column	Type	Indexing
-user_id	INT (PK)	Indexed (primary)
-display_name	VARCHAR	Indexed
-name	VARCHAR	
-profile_pic	VARCHAR (URL)	
-bio	TEXT
-
-Post Table (Partitioned)
-Column	Type	Indexing
-post_id	INT (PK)	Indexed (primary)
-user_id	INT (FK)	Indexed (foreign)
-timestamp	TIMESTAMP	Indexed
-post_text	TEXT	
-post_content	VARCHAR (URL)	
-
-Post_User Table (With Composite Key)
-Column	Type	Indexing
-user_id	INT (FK)	Indexed (foreign)
-post_id	INT (FK)	Indexed (foreign)
-action	VARCHAR	
-timestamp	TIMESTAMP	
-Primary Key	(user_id, post_id, action)	Composite key */
 con.query(`CREATE TABLE IF NOT EXISTS users(
     user_id VARCHAR(255) PRIMARY KEY,
     name VARCHAR(50),

@@ -1,5 +1,5 @@
 # Use the official Node.js image.
-FROM node:14
+FROM node:18-alpine
 
 # Create and change to the app directory.
 WORKDIR /usr/src/app
@@ -14,6 +14,7 @@ RUN npm install
 COPY . .
 
 # Build the frontend.
+#RUN node db-init.js
 RUN npm run build:frontend
 
 RUN ls -la /usr/src/app/bethel-social-client/dist

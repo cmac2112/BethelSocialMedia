@@ -4,6 +4,7 @@ import Layout from '../Layout'
 import { useAuth } from '../../context/Loggedin'
 import CreatePost from '../CreatePost'
 import { Link } from 'react-router-dom'
+import Error from '../Modals/Error'
 interface Post {
   post_id: number,
   name: string,
@@ -20,8 +21,9 @@ const HomePage = () => {
   const posts = useRef<Post[]>([]);
   const offset = useRef(0);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const getPosts = async () =>{ //add extra functionality later to make only certain posts show up to reduce load times
+  const getPosts = async () =>{ 
     setLoading(true);
     console.log('get posts is running')
     try{
@@ -40,19 +42,19 @@ const HomePage = () => {
 
   }catch(err){
     console.log(err)
+    setError('There was an error loading posts');
+    setTimeout(() => {setError('')}, 5000);
     //use seth's error popup
   }
   setLoading(false);
 }
 //this function will run to complete reload all posts if a user creates a post so it appears at the top of the feed
-const getPostsAfterUserPosts = async () =>{ //add extra functionality later to make only certain posts show up to reduce load times
+const getPostsAfterUserPosts = async () =>{
   offset.current = 0;
   posts.current = [];
   getPosts();
 }
 
-//https://finaltest-951995672515.us-central1.run.app/home
-//https://finaltest-951995672515.us-central1.run.app
 const handleScroll = () => {
   if (window.innerHeight + document.documentElement.scrollTop >= document.documentElement.offsetHeight - 1 && !loading) {
     getPosts();
@@ -71,6 +73,7 @@ useEffect(() => {
     <Layout>
       {isLoggedIn ? (
       <div className="md:px-52 bg-gray-200">
+        {error && <Error error_string={error} />}
         <div className="py-2 ">
         <CreatePost getposts={getPostsAfterUserPosts} />
         </div>
