@@ -24,7 +24,7 @@ const GOOGLE_USERINFO_API = "https://www.googleapis.com/oauth2/v3/userinfo";
 const connectionConfig = {
   host: process.env.DB_HOST || 'localhost',
   port: process.env.DB_PORT || 3306,
-  user: process.env.DB_USER || DB_USER,
+  user: process.env.DB_USER || 'root',
   password: process.env.DB_PASSWORD || DB_PASSWORD,
   database: process.env.DB_DATABASE || "BCSocial",
   insecureAuth: true
@@ -255,8 +255,4 @@ app.get("*", (req, res) => {
 const port = process.env.SERVER_PORT || 3000;
 app.listen(port, () => {
   console.log("Server started on port " + port);
-  console.log(con.host)
-console.log(con.user)
-console.log(con.password)
-console.log(con.database)
 });
