@@ -17,8 +17,8 @@ interface Post {
   user_id: string,
 }
 const ProfilePage = () => {
-  const [bio, setBio] = useState(""); //angel will use this to change the bio
-  const posts = useRef<Post[]>([]) //this will hold the posts that the user has made
+  const [bio, setBio] = useState(""); 
+  const posts = useRef<Post[]>([]) 
   const offset = useRef(0);
   const [loading, setLoading] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
@@ -30,15 +30,11 @@ const ProfilePage = () => {
 
   console.log(userid)
 
-  const checkIfOwner = () =>{ //check to see if the user owns the profile
-  //check to see if the user owns the profile
+  const checkIfOwner = () =>{ 
   if(userInfo.sub === userid){
-    console.log('this is your profile')
-    console.log(userInfo.sub)
-    console.log(userid)
     setIsOwner(true);
   }else{
-    console.log('this is not your profile')
+
     setIsOwner(false);
   }
 }
@@ -68,7 +64,7 @@ const ProfilePage = () => {
       //use seth's error popup
   }
 }
-  const getPosts = async () =>{ //add extra functionality later to make only certain posts show up to reduce load times
+  const getPosts = async () =>{
     setLoading(true);
     console.log('get posts is running')
     try{
@@ -150,7 +146,6 @@ useEffect(() => {
   },[loading, isLoggedIn]);
 
 
-  //obviously change images later
   return (
     <Layout>
       {isLoggedIn ? (

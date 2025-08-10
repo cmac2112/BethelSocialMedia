@@ -1,5 +1,5 @@
 require("dotenv").config();
-const mysql = require("mysql");
+const mysql = require("mysql2");
 const express = require("express");
 const app = express();
 const cors = require("cors");
@@ -20,32 +20,21 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 const GOOGLE_USERINFO_API = "https://www.googleapis.com/oauth2/v3/userinfo";
-//const client = new OAuth2Client(process.env.CLIENT_ID);
-
-// will need some sort of middleware to handle files in POST requests
-// multer is the middleware, storing files is another issue
-
-//we will need GET, PUT, and POST for profile bios
 
 const connectionConfig = {
-  host: process.env.DB_HOST || '34.29.241.52',
+  host: process.env.DB_HOST || 'localhost',
   port: process.env.DB_PORT || 3306,
   user: process.env.DB_USER || DB_USER,
   password: process.env.DB_PASSWORD || DB_PASSWORD,
   database: process.env.DB_DATABASE || "BCSocial",
+  insecureAuth: true
 };
 
 
-/*
-const connectionConfig = {
-  host: 'localhost',
-  port: 3306,
-  user: 'dbuser',
-  password: 'michon70',
-  database: "BCSocial",
-};
-*/
+
+
 const con = mysql.createConnection(connectionConfig);
+
 
 con.connect(function (err) {
   if (err) throw err;
@@ -266,4 +255,8 @@ app.get("*", (req, res) => {
 const port = process.env.SERVER_PORT || 3000;
 app.listen(port, () => {
   console.log("Server started on port " + port);
+  console.log(con.host)
+console.log(con.user)
+console.log(con.password)
+console.log(con.database)
 });
